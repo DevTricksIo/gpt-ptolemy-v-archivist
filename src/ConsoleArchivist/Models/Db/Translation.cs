@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace ConsoleArchivist.Models;
+namespace ConsoleArchivist.Models.Db;
 
 public class Translation
 {

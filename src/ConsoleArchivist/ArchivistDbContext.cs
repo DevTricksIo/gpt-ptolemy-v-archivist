@@ -1,4 +1,4 @@
-﻿using ConsoleArchivist.Models;
+﻿using ConsoleArchivist.Models.Db;
 using Microsoft.EntityFrameworkCore;
 
 namespace ConsoleArchivist.Database;

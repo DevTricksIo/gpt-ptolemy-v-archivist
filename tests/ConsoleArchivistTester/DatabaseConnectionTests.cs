@@ -6,7 +6,7 @@ namespace ConsoleArchivistTester
     {
 
         [Fact]
-        public void ArchivistDbContextInstantiate_Success()
+        public void CanInstantiateArchivistDbContext_Success()
         {
             //Arrange
             //Act
