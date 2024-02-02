@@ -1,7 +1,6 @@
 ﻿using ConsoleArchivist.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Net.Http.Headers;
 using Microsoft.Extensions.Configuration;
 using ConsoleArchivist.Database;
 using Microsoft.EntityFrameworkCore;
@@ -33,19 +32,23 @@ public class Program
 
                 services.AddHttpClient("GitHubHTTPClient", client =>
                 {
-                    var owner = context.Configuration.GetSection("GitHubConfiguration:Owner").Value;
-                    var repo = context.Configuration.GetSection("GitHubConfiguration:Repo").Value;
-
                     var token = context.Configuration.GetSection("GitHubConfiguration:Token").Value;
 
-                    client.BaseAddress = new Uri($"https://api.github.com/repos/{owner}/{repo}/contents");
-                    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("GPTPtolemyVArchivist", "1.0"));
+                    client.BaseAddress = new Uri("https://api.github.com/repos");
+                });
+
+                services.AddHttpClient("OpenAIAPI", client =>
+                {
+                    var apiKey = context.Configuration.GetSection("OpenAIConfiguration:APIKey").Value;
+                    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+                    client.BaseAddress = new Uri("https://api.openai.com");
                 });
 
                 services.AddScoped<IGitHubService, GitHubService>();
+                services.AddScoped<IOpenAIService, OpenAIService>();
 
                 services.AddScoped<Startup>();
-
 
             })
             .Build();
