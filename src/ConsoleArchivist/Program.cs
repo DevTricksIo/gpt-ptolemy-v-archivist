@@ -4,6 +4,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using ConsoleArchivist.Database;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Headers;
+using System.Net.Http;
 
 namespace ConsoleArchivist;
 
@@ -34,7 +36,10 @@ public class Program
                 {
                     var token = context.Configuration.GetSection("GitHubConfiguration:Token").Value;
 
-                    client.BaseAddress = new Uri("https://api.github.com/repos");
+                    client.BaseAddress = new Uri("https://api.github.com");
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("token", token);
+                    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AppName", "1.0"));
+
                 });
 
                 services.AddHttpClient("OpenAIAPI", client =>

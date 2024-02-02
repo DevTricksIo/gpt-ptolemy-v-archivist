@@ -26,9 +26,13 @@ public class GitHubService(IHttpClientFactory httpClientFactory,
 
         if (!await TranslationExists(path))
         {
-            var response = await _httpClient.PutAsync(path, payload);
+            var response = await _httpClient.PostAsync(path, payload);
 
             if (response.IsSuccessStatusCode) return true;
+        }
+        else
+        {
+            return true;
         }
 
         return false;
