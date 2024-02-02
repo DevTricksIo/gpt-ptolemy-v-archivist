@@ -12,7 +12,7 @@ public class GitHubService(IHttpClientFactory httpClientFactory,
 
     public async Task<bool> SendTranslation(string yamlTranslation)
     {
-        var langTag = TranslationHelper.LangTag(yamlTranslation);
+        var langTag = TranslationHelper.GetLangTag(yamlTranslation);
         var message = $"Created {langTag}.md file";
         var content = Convert.ToBase64String(Encoding.UTF8.GetBytes(yamlTranslation));
         var branch = _configuration.GetSection("GitHubConfiguration:Branch").Value;
@@ -26,7 +26,7 @@ public class GitHubService(IHttpClientFactory httpClientFactory,
 
         if (!await TranslationExists(path))
         {
-            var response = await _httpClient.PostAsync(path, payload);
+            var response = await _httpClient.PutAsync(path, payload);
 
             if (response.IsSuccessStatusCode) return true;
         }
@@ -40,8 +40,8 @@ public class GitHubService(IHttpClientFactory httpClientFactory,
 
     private async Task<bool> TranslationExists(string path)
     {
-        var file = await _httpClient.GetAsync(path);
+        var response = await _httpClient.GetAsync(path);
 
-        return file.IsSuccessStatusCode;        
+        return response.IsSuccessStatusCode;
     }
 }

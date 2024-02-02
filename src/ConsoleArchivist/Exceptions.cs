@@ -6,5 +6,5 @@ public class ContentNullException(string paramName, string message)
 public class EmptyContentException(string paramName, string message) 
     : Exception($"{paramName}: {message}") { }
 
-public class LagTagAbsentException(string paramName, string message) 
+public class KeyAbsentException(string paramName, string message) 
     : Exception($"{paramName}: {message}") { }

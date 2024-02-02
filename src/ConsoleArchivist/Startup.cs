@@ -16,7 +16,8 @@ public class Startup(ArchivistDbContext dbContext, IGitHubService gitHubService,
         do
         {
             var pendingTranslations = _dbContext.Translations
-                .Where(e => e.GPTTranslationInYaml == null || e.IsToSentToGitHub && !e.InGitHub)
+                .Where(t => t.GPTTranslationInYaml == null || t.IsToSentToGitHub && !t.InGitHub)
+                .OrderBy(t => t.Id)
                 .Take(3);
 
             if (!pendingTranslations.Any()) break;
@@ -27,7 +28,7 @@ public class Startup(ArchivistDbContext dbContext, IGitHubService gitHubService,
    
                 if (content != null)
                 {
-                    var langTag = TranslationHelper.LangTag(content);
+                    var langTag = TranslationHelper.GetLangTag(content);
                     transl.GPTTranslationInYaml = content;
                     transl.LangTag = langTag;
 

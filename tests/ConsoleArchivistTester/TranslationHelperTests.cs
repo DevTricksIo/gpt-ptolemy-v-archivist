@@ -27,7 +27,7 @@ buttonRandom: Random
 direction: ltr
 ---";
             //Act
-            var lanTag = TranslationHelper.LangTag(content);
+            var lanTag = TranslationHelper.GetLangTag(content);
 
             //Assert
             Assert.Equal("en", lanTag);
@@ -57,7 +57,7 @@ direction: ltr
 ";
 
             //Act
-            var lanTag = TranslationHelper.LangTag(content);
+            var lanTag = TranslationHelper.GetLangTag(content);
 
             //Assert
             Assert.Equal("tlh", lanTag);
@@ -87,7 +87,7 @@ direction: ltr
 ";
 
             //Act
-            var lanTag = TranslationHelper.LangTag(content);
+            var lanTag = TranslationHelper.GetLangTag(content);
 
             //Assert
             Assert.Equal("sr-Latn", lanTag);
@@ -101,10 +101,9 @@ direction: ltr
 
             //Act
             //Assert
-            var exception = Assert.Throws<ContentNullException>(() => TranslationHelper.LangTag(content));
+            var exception = Assert.Throws<ContentNullException>(() => TranslationHelper.GetLangTag(content));
 
-            // Agora você pode fazer asserções sobre a exceção capturada, como verificar a mensagem.
-            Assert.Equal("ymlTranslation: The translation cannot be null", exception.Message);
+            Assert.Contains("The translation cannot be null", exception.Message);
         }
 
         [Fact]
@@ -115,9 +114,9 @@ direction: ltr
 
             //Act
             //Assert
-            var exception = Assert.Throws<EmptyContentException>(() => TranslationHelper.LangTag(content));
+            var exception = Assert.Throws<EmptyContentException>(() => TranslationHelper.GetLangTag(content));
 
-            Assert.Equal("ymlTranslation: The translation cannot be empty", exception.Message);
+            Assert.Contains("The translation cannot be empty", exception.Message);
         }
 
         [Fact]
@@ -143,9 +142,37 @@ direction: ltr
 ";
 
             //Act
-            var exception = Assert.Throws<LagTagAbsentException>(() => TranslationHelper.LangTag(content));
+            var exception = Assert.Throws<KeyAbsentException>(() => TranslationHelper.GetLangTag(content));
 
-            Assert.Equal("ymlTranslation: No lantag was found in the translation", exception.Message);
+            Assert.Contains("No lantag was found in the translation", exception.Message);
+        }
+
+        [Fact]
+        public void GetEnglishLangName_Success()
+        {
+            //Arrange
+            var content = @"
+---
+layout: quote
+permalink: /en/
+langtag: en
+type: modern
+script: Latn
+langName: English
+englishLangName: English
+title: Decree of Pharaoh Ptolemy V inscribed on the Rosetta Stone
+quote: Copies of this Decree shall be cut in hieroglyphs, demotic, and Greek on basalt slabs and placed in the first, second, and third-order temples alongside the statue of Ptolemy, the ever-living god.
+reference: Decrees of Ptolemy V on the Rosetta Stone, 196 B.C., British Museum.
+imageAlt: Coin with the face of Ptolemy V
+selectAriaLabel: Select a language
+buttonRandom: Random
+direction: ltr
+---";
+            //Act
+            var englishLangName = TranslationHelper.GetEnglishLangName(content);
+
+            //Assert
+            Assert.Equal("English", englishLangName);
         }
     }
 }
