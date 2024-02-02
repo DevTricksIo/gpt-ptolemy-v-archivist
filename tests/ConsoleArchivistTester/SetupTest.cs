@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
+using ConsoleArchivist.Services.Abstractions;
 
 namespace ConsoleArchivistTester
 {

@@ -3,7 +3,10 @@ using System.Text.RegularExpressions;
 
 namespace ConsoleArchivist.Helpers;
 
-public  class TranslationHelper
+/// <summary>
+/// Provides methods to extract data from YAML translations string content
+/// </summary>
+public  class TutHelper
 {
     public static string GetLangTag(string yamlTranslation)
     {
@@ -37,6 +40,5 @@ public  class TranslationHelper
         }
 
         throw new KeyAbsentException(nameof(yamlTranslation), "No EnglishLangName was found in the translation");
-
     }
 }

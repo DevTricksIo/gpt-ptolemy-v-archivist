@@ -2,46 +2,26 @@
 using System.Text.Json;
 using System.Text;
 using ConsoleArchivist.Models.Responses;
-using ConsoleArchivist.Helpers;
-using Microsoft.Extensions.Configuration;
+using ConsoleArchivist.Services.Abstractions;
 
 namespace ConsoleArchivist.Services
 {
-    public class OpenAIService(IHttpClientFactory httpClientFactory, IConfiguration configuration) : IOpenAIService
+    public class OpenAIService(IHttpClientFactory httpClientFactory, IPharaohBodyBuilderService bodyBuilder) : IOpenAIService
     {
         private readonly HttpClient _httpClient = httpClientFactory.CreateClient("OpenAIAPI");
-        private readonly IConfiguration _configuration = configuration;
+        private readonly IPharaohBodyBuilderService bodyBuilder = bodyBuilder;
 
-        public async Task<string?> GetTranslation(string prompt)
+        public async Task<string> GetAYamlTranslationBasedOnTemplate(string targetLanguage)
         {
-            var url = "/v1/chat/completions";
-
-            var options = new JsonSerializerOptions
-            {
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            };
-
-            var jsonRequest = JsonSerializer.Serialize(BuildGetTranslationBodyRequest(prompt), options);
-
-            var payload = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync(url, payload);
-
-            response.EnsureSuccessStatusCode();
-
-            var responseObj = JsonSerializer.Deserialize<JsonResponse>(await response.Content.ReadAsStringAsync());
-
-            var theResponseHasContent = responseObj != null && responseObj.Choices != null && responseObj.Choices.Length > 0;
-
-            if (theResponseHasContent)
-            {
-                return responseObj!.Choices![0].Message.Content;
-            }
-
-            return null;
+            return await GetAsync(bodyBuilder.BuildGetTranslationBodyRequest(targetLanguage));
         }
 
-        public async Task<string?> IsAAcceptableTranslation(string yamlTranslation)
+        public async Task<string> IsAGoodTranslation(string yamlTranslation)
+        {
+            return await GetAsync(bodyBuilder.BuildIsAcceptableTranslationBodyRequest(yamlTranslation));
+        }
+
+        private async Task<string> GetAsync(object requestBody)
         {
             var url = "/v1/chat/completions";
 
@@ -50,7 +30,7 @@ namespace ConsoleArchivist.Services
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
             };
 
-            var jsonRequest = JsonSerializer.Serialize(BuildIsAcceptableTranslationBodyRequest(yamlTranslation), options);
+            var jsonRequest = JsonSerializer.Serialize(requestBody, options);
 
             var payload = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
@@ -61,56 +41,13 @@ namespace ConsoleArchivist.Services
             var jsonResponse = JsonSerializer.Deserialize<JsonResponse>(await response.Content.ReadAsStringAsync());
 
             var theResponseHasContent = jsonResponse != null && jsonResponse.Choices != null && jsonResponse.Choices.Length > 0;
-            
+
             if (theResponseHasContent)
             {
                 return jsonResponse!.Choices![0].Message.Content;
             }
 
-            return null;
+            throw new Exception("Unknow error!");
         }
-
-        private object BuildGetTranslationBodyRequest(string targetLanguage)
-        {
-            return new
-            {
-                model = "gpt-4",
-                messages = new List<object>
-                {
-                    new
-                    {
-                        role = "system",
-                        content = _configuration.GetSection("Prompt:InstructionForTranslation").Value
-                    },
-                    new
-                    {
-                        role = "user",
-                        content = targetLanguage
-                    }
-                }
-            };
-        }
-
-        private object BuildIsAcceptableTranslationBodyRequest(string yamlTranslation)
-        {
-            return new
-            {
-                model = "gpt-4",
-                messages = new List<object>
-                {
-                    new
-                    {
-                        role = "system",
-                        content = _configuration.GetSection("Prompt:InstructionForReviewing").Value
-                    },
-                    new
-                    {
-                        role = "user",
-                        content = $"Target language: {TranslationHelper.GetEnglishLangName(yamlTranslation)}  Content: {yamlTranslation}"
-                    }
-                }
-            };
-        }
-
     }
 }

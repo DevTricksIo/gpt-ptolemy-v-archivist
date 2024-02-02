@@ -1,4 +1,5 @@
 ﻿using ConsoleArchivist.Helpers;
+using ConsoleArchivist.Services.Abstractions;
 using Microsoft.Extensions.Configuration;
 using System.Text;
 
@@ -12,11 +13,11 @@ public class GitHubService(IHttpClientFactory httpClientFactory,
 
     public async Task<bool> SendTranslation(string yamlTranslation)
     {
-        var langTag = TranslationHelper.GetLangTag(yamlTranslation);
+        var langTag = TutHelper.GetLangTag(yamlTranslation);
         var message = $"Created {langTag}.md file";
         var content = Convert.ToBase64String(Encoding.UTF8.GetBytes(yamlTranslation));
-        var branch = _configuration.GetSection("GitHubConfiguration:Branch").Value;
 
+        var branch = _configuration.GetSection("GitHubConfiguration:Branch").Value;
         var owner = _configuration.GetSection("GitHubConfiguration:Owner").Value;
         var repo = _configuration.GetSection("GitHubConfiguration:Repo").Value;
 
@@ -24,24 +25,10 @@ public class GitHubService(IHttpClientFactory httpClientFactory,
 
         var path = $"/repos/{owner}/{repo}/contents/src/_translations/{langTag}.md";
 
-        if (!await TranslationExists(path))
-        {
-            var response = await _httpClient.PutAsync(path, payload);
+        var response = await _httpClient.PutAsync(path, payload);
 
-            if (response.IsSuccessStatusCode) return true;
-        }
-        else
-        {
-            return true;
-        }
-
+        if (response.IsSuccessStatusCode) return true;
+    
         return false;
-    }
-
-    private async Task<bool> TranslationExists(string path)
-    {
-        var response = await _httpClient.GetAsync(path);
-
-        return response.IsSuccessStatusCode;
     }
 }

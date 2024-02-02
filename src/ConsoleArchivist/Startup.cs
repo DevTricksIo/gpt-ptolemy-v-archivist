@@ -1,6 +1,6 @@
 ﻿using ConsoleArchivist.Database;
 using ConsoleArchivist.Helpers;
-using ConsoleArchivist.Services;
+using ConsoleArchivist.Services.Abstractions;
 
 namespace ConsoleArchivist;
 
@@ -16,30 +16,35 @@ public class Startup(ArchivistDbContext dbContext, IGitHubService gitHubService,
         do
         {
             var pendingTranslations = _dbContext.Translations
-                .Where(t => t.GPTTranslationInYaml == null || t.IsToSentToGitHub && !t.InGitHub)
+                .Where(t => t.GPTTranslationInYaml == null || !t.InGitHub)
                 .OrderBy(t => t.Id)
-                .Take(3);
+                .Take(10);
 
             if (!pendingTranslations.Any()) break;
 
-            foreach (var transl in pendingTranslations)
+            foreach (var pendingTranslation in pendingTranslations)
             {
-                var content = transl.GPTTranslationInYaml ?? await _openAIService.GetTranslation(prompt: transl.Name);
-   
-                if (content != null)
+                var yamlTranslation = pendingTranslation.GPTTranslationInYaml ?? await _openAIService.GetAYamlTranslationBasedOnTemplate(targetLanguage: pendingTranslation.TargetLanguage);
+                var isAGoodTranslation = await _openAIService.IsAGoodTranslation(yamlTranslation: yamlTranslation);
+
+                pendingTranslation.LangTag = TutHelper.GetLangTag(yamlTranslation);
+                pendingTranslation.GPTTranslationInYaml = yamlTranslation;
+                pendingTranslation.IsAGoodTranslation = isAGoodTranslation;
+
+                if (!isAGoodTranslation.Boolify())
                 {
-                    var langTag = TranslationHelper.GetLangTag(content);
-                    transl.GPTTranslationInYaml = content;
-                    transl.LangTag = langTag;
-
-                    transl.InGitHub = transl.InGitHub || await _gitHubService.SendTranslation(content);
-
+                    pendingTranslation.IsToSentToGitHub = false;
+                    pendingTranslation.Notes = "I will not send this translation to GitHub because it is a not good translation. " + isAGoodTranslation;
+                }
+                else if(isAGoodTranslation.Boolify() && pendingTranslation.IsToSentToGitHub)
+                {
+                   pendingTranslation.InGitHub = await _gitHubService.SendTranslation(yamlTranslation: yamlTranslation);
                 }
 
                 _dbContext.SaveChanges();
-            }
 
-            Thread.Sleep(TimeSpan.FromMinutes(1));
+                Thread.Sleep(TimeSpan.FromMinutes(1));
+            }
 
         } while (true);
     }

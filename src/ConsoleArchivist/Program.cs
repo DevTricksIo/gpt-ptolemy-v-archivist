@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using ConsoleArchivist.Database;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
-using System.Net.Http;
+using ConsoleArchivist.Services.Abstractions;
 
 namespace ConsoleArchivist;
 
@@ -36,10 +36,9 @@ public class Program
                 {
                     var token = context.Configuration.GetSection("GitHubConfiguration:Token").Value;
 
-                    client.BaseAddress = new Uri("https://api.github.com");
+                    client.BaseAddress = new Uri(context.Configuration.GetSection("GitHubConfiguration:BaseAddress").Value); ;
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("token", token);
                     client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AppName", "1.0"));
-
                 });
 
                 services.AddHttpClient("OpenAIAPI", client =>
@@ -47,11 +46,12 @@ public class Program
                     var apiKey = context.Configuration.GetSection("OpenAIConfiguration:APIKey").Value;
                     client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
 
-                    client.BaseAddress = new Uri("https://api.openai.com");
+                    client.BaseAddress = new Uri(context.Configuration.GetSection("OpenAIConfiguration:BaseAddress").Value);
                 });
 
                 services.AddScoped<IGitHubService, GitHubService>();
                 services.AddScoped<IOpenAIService, OpenAIService>();
+                services.AddScoped<IPharaohBodyBuilderService, PharaohBodyBuilderService>();
 
                 services.AddScoped<Startup>();
 

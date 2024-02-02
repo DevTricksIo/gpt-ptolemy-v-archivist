@@ -27,7 +27,7 @@ buttonRandom: Random
 direction: ltr
 ---";
             //Act
-            var lanTag = TranslationHelper.GetLangTag(content);
+            var lanTag = TutHelper.GetLangTag(content);
 
             //Assert
             Assert.Equal("en", lanTag);
@@ -57,7 +57,7 @@ direction: ltr
 ";
 
             //Act
-            var lanTag = TranslationHelper.GetLangTag(content);
+            var lanTag = TutHelper.GetLangTag(content);
 
             //Assert
             Assert.Equal("tlh", lanTag);
@@ -87,7 +87,7 @@ direction: ltr
 ";
 
             //Act
-            var lanTag = TranslationHelper.GetLangTag(content);
+            var lanTag = TutHelper.GetLangTag(content);
 
             //Assert
             Assert.Equal("sr-Latn", lanTag);
@@ -101,7 +101,7 @@ direction: ltr
 
             //Act
             //Assert
-            var exception = Assert.Throws<ContentNullException>(() => TranslationHelper.GetLangTag(content));
+            var exception = Assert.Throws<ContentNullException>(() => TutHelper.GetLangTag(content));
 
             Assert.Contains("The translation cannot be null", exception.Message);
         }
@@ -114,7 +114,7 @@ direction: ltr
 
             //Act
             //Assert
-            var exception = Assert.Throws<EmptyContentException>(() => TranslationHelper.GetLangTag(content));
+            var exception = Assert.Throws<EmptyContentException>(() => TutHelper.GetLangTag(content));
 
             Assert.Contains("The translation cannot be empty", exception.Message);
         }
@@ -142,7 +142,7 @@ direction: ltr
 ";
 
             //Act
-            var exception = Assert.Throws<KeyAbsentException>(() => TranslationHelper.GetLangTag(content));
+            var exception = Assert.Throws<KeyAbsentException>(() => TutHelper.GetLangTag(content));
 
             Assert.Contains("No lantag was found in the translation", exception.Message);
         }
@@ -169,7 +169,7 @@ buttonRandom: Random
 direction: ltr
 ---";
             //Act
-            var englishLangName = TranslationHelper.GetEnglishLangName(content);
+            var englishLangName = TutHelper.GetEnglishLangName(content);
 
             //Assert
             Assert.Equal("English", englishLangName);
