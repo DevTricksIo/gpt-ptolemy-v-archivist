@@ -1,13 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore.Design;
 using ConsoleArchivist.Database;
 
-namespace ConsoleArchivist
+namespace ConsoleArchivist;
+
+public  class ArchivistDbContextFactory: IDesignTimeDbContextFactory<ArchivistDbContext>
 {
-    public  class ArchivistDbContextFactory: IDesignTimeDbContextFactory<ArchivistDbContext>
+    public ArchivistDbContext CreateDbContext(string[] args)
     {
-        public ArchivistDbContext CreateDbContext(string[] args)
-        {
-            return ArchivistDbContext.Instance;
-        }
+        return ArchivistDbContext.Instance;
     }
 }
