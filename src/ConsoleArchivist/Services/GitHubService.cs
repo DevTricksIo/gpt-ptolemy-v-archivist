@@ -1,54 +1,38 @@
 ﻿using ConsoleArchivist.Helpers;
+using Microsoft.Extensions.Configuration;
 using System.Text;
 
 namespace ConsoleArchivist.Services;
 
-public class GitHubService : IGitHubService
+public class GitHubService(IHttpClientFactory httpClientFactory,
+                           IConfiguration configuration) : IGitHubService
 {
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient _httpClient = httpClientFactory.CreateClient("GitHubHTTPClient");
+    private readonly IConfiguration _configuration = configuration;
 
-    public GitHubService(IHttpClientFactory httpClientFactory)
+    public async Task<bool> SendTranslation(string yamlTranslation)
     {
-        _httpClient = httpClientFactory.CreateClient("GitHubHTTPClient");
-    }
-
-    public async Task<bool> SendTranslation(string translationContent)
-    {
-        var langTag = TranslationHelper.LangTag(translationContent);
-
-
-        var path = $"src/_translations/{langTag}.md";
-        var branch = "a";
-
-
+        var langTag = TranslationHelper.LangTag(yamlTranslation);
         var message = $"Created {langTag}.md file";
-        var content = Convert.ToBase64String(Encoding.UTF8.GetBytes(translationContent));
+        var content = Convert.ToBase64String(Encoding.UTF8.GetBytes(yamlTranslation));
+        var branch = _configuration.GetSection("GitHubConfiguration:Branch").Value;
 
-        var githubApiBaseUrl = $"https://api.github.com/repos/abc/123/contents/{path}";
         var payload = new StringContent($"{{\"message\": \"{message}\", \"content\": \"{content}\", \"branch\": \"{branch}\"}}", Encoding.UTF8, "application/json");
 
-        var currentMd = await _httpClient.GetAsync(githubApiBaseUrl);
-
-        if (currentMd.IsSuccessStatusCode)
+        if (!await TranslationExists(langTag))
         {
-            Console.WriteLine($"Skipping {langTag}.md - File already exists.");
-            return false;
-        }
-        else
-        {
-            var response = await _httpClient.PutAsync(githubApiBaseUrl, payload);
+            var response = await _httpClient.PutAsync($"/src/_translations/{langTag}.md", payload);
 
-            if (response.IsSuccessStatusCode)
-            {
-                Console.WriteLine($"File {langTag}.md created.");
-                return true;
-            }
-            else
-            {
-                Console.WriteLine($"Failed to create {langTag}.md file : {response.StatusCode}");
-                return false;
-            }
+            if (response.IsSuccessStatusCode) return true;
         }
 
+        return false;
+    }
+
+    private async Task<bool> TranslationExists(string langTag)
+    {
+        var file = await _httpClient.GetAsync($"/src/_translations/{langTag}.md");
+
+        return file.IsSuccessStatusCode;        
     }
 }
