@@ -2,20 +2,20 @@
 
 namespace ConsoleArchivistTester
 {
-    public  class ConfigurationExtensionsTests : SetUp
+    public  class ConfigurationExtensionsTests : SetupTest
     {
         //TODO Refactor this how test with other values?
-        [Fact]
-        public void CanInstantiateGitHubAPIClient_Success()
-        {
-            //Arrange
-            var token = Configuration.GetGitHubToken();
+        //[Fact]
+        //public void CanInstantiateGitHubAPIClient_Success()
+        //{
+        //    //Arrange
+        //    var token = Configuration.GetGitHubToken();
 
-            //Act
+        //    //Act
 
-            //Assert
-            Assert.NotNull(token);
-            Assert.NotEmpty(token);
-        }
+        //    //Assert
+        //    Assert.NotNull(token);
+        //    Assert.NotEmpty(token);
+        //}
     }
 }

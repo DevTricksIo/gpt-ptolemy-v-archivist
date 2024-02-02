@@ -1,20 +1,21 @@
-﻿using ConsoleArchivist.Services;
+﻿using ConsoleArchivist.Database;
+using ConsoleArchivist.Services;
+using ConsoleArchivist;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Net.Http.Headers;
-using Microsoft.Extensions.Configuration;
-using ConsoleArchivist.Database;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Headers;
 
-namespace ConsoleArchivist;
-
-public class Program
+namespace ConsoleArchivistTester
 {
-    static async Task Main(string[] args)
+    public  class SetupTest
     {
+        public IHost host;
 
-        //Configure a Generic Host
-        var host = Host.CreateDefaultBuilder(args)
+        public SetupTest()
+        {
+             host = Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration(app =>
             {
                 app.AddUserSecrets("55dcc747-60cd-49e2-9cc0-666934af5dee");
@@ -49,9 +50,6 @@ public class Program
 
             })
             .Build();
-
-        var startUp = host.Services.GetRequiredService<Startup>();
-
-        await startUp.Run();
+        }
     }
 }
